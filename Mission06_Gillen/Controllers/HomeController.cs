@@ -33,7 +33,11 @@ namespace Mission06_Gillen.Controllers
         [HttpGet]
         public IActionResult MovieForm()
         {
-            return View();
+            ViewBag.Categories = _context.Categories
+                .OrderBy(x => x.CategoryName)
+                .ToList();
+
+            return View("MovieForm");
         }
 
         [HttpPost]
@@ -45,10 +49,33 @@ namespace Mission06_Gillen.Controllers
             return View("Confirmation", response);
         }
 
+        public IActionResult MovieCollection()
+        {
+            var movies = _context.Movies
+                .Select(x => new AddMovie
+                {
+                    Title = x.Title ?? "Unknown Title",
+                    Year = x.Year ?? "Unknown Year",
+                    Director = x.Director ?? "Unknown Director",
+                    Rating = x.Rating ?? "Unrated",
+                    Edited = x.Edited,
+                    CopiedToPlex = x.CopiedToPlex,
+                    LentTo = x.LentTo ?? "Not Lent",
+                    Notes = x.Notes ?? "No Notes"
+                })
+                .Where(x => x.Title != null)
+                .OrderBy(x => x.Title)
+                .ToList();
+
+            return View(movies);
+        }
+
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+        
     }
 }
