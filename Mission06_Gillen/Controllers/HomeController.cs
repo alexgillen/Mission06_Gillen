@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Mission06_Gillen.Models;
 
 namespace Mission06_Gillen.Controllers
@@ -12,13 +13,6 @@ namespace Mission06_Gillen.Controllers
         {
             _context = temp;
         }
-
-        //private readonly ILogger<HomeController> _logger;
-
-        //public HomeController(ILogger<HomeController> logger)
-        //{
-        //    _logger = logger;
-        //}
 
         public IActionResult Index()
         {
@@ -37,58 +31,166 @@ namespace Mission06_Gillen.Controllers
                 .OrderBy(x => x.CategoryName)
                 .ToList();
 
-            return View("MovieForm");
+            return View("MovieForm", new AddMovie());
         }
 
         [HttpPost]
         public IActionResult MovieForm(AddMovie response)
         {
-            response.MovieId = Guid.NewGuid().ToString(); // or any other unique value
-            _context.Movies.Add(response);
-            _context.SaveChanges();
+            if (ModelState.IsValid)
+            {
+                _context.Movies.Add(response);
+                _context.SaveChanges();
 
-            return View("Confirmation", response);
+                return View("Confirmation", response);
+            }
+            else
+            {
+                ViewBag.Categories = _context.Categories
+                    .OrderBy(x => x.CategoryName)
+                    .ToList();
+
+                return View(response);
+            }
+            
         }
 
         public IActionResult MovieCollection()
         {
             var movies = _context.Movies
-                .Select(x => new AddMovie
-                {
-                    Title = x.Title ?? "Unknown Title",
-                    Year = x.Year ?? "Unknown Year",
-                    Director = x.Director ?? "Unknown Director",
-                    Rating = x.Rating ?? "Unrated",
-                    Edited = x.Edited,
-                    CopiedToPlex = x.CopiedToPlex,
-                    LentTo = x.LentTo ?? "Not Lent",
-                    Notes = x.Notes ?? "No Notes"
-                })
+                .Include(x => x.Category)
                 .OrderBy(x => x.Title)
                 .ToList();
 
             return View(movies);
+
+
+            //var movies = _context.Movies
+            //    .Select(x => new AddMovie
+            //    {
+            //        MovieId = x.MovieId,
+            //        Title = x.Title ?? "Unknown Title",
+            //        Year = x.Year ?? "Unknown Year",
+            //        Director = x.Director ?? "Unknown Director",
+            //        Rating = x.Rating ?? "Unrated",
+            //        Edited = x.Edited,
+            //        CopiedToPlex = x.CopiedToPlex,
+            //        LentTo = x.LentTo ?? "Not Lent",
+            //        Notes = x.Notes ?? "No Notes"
+            //    })
+            //    .OrderBy(x => x.Title)
+            //    .ToList();
+
+            //return View(movies);
         }
 
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        }
+        //[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+        //public IActionResult Error()
+        //{
+        //    return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        //}
 
-        public IActionResult Edit(string id)
+        [HttpGet]
+        public IActionResult Edit(int id)
         {
             var recordToEdit = _context.Movies
-                .SingleOrDefault(x => x.MovieId == id);
+                .Where(x => x.MovieId == 1);
+            return View("MovieForm");
 
-            ViewBag.Categories = _context.Movies
-                .Where(x => !string.IsNullOrEmpty(x.Title))
-                .OrderBy(x => x.Title)
-                .ToList();
+            //var recordToEdit = _context.Movies
+            //    .Single(x => x.MovieId == id);
 
-            return View("MovieForm", recordToEdit);
+            //if (recordToEdit == null)
+            //{
+            //    return NotFound();
+            //}
+
+            //ViewBag.Categories = _context.Categories
+            //    .OrderBy(x => x.CategoryId)
+            //    .ToList();
+
+            //return View("MovieForm", recordToEdit);
         }
-        
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Edit(int id, AddMovie updatedInfo)
+        {
+            Console.WriteLine($"Received ID: {id}, Movie ID: {updatedInfo.MovieId}");
+
+            if (id != updatedInfo.MovieId)
+            {
+                Console.WriteLine("Error: ID mismatch");
+                return BadRequest();
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    var existingRecord = _context.Movies
+                        .FirstOrDefault(x => x.MovieId == id);
+
+                    if (existingRecord != null)
+                    {
+                        Console.WriteLine("Error: Movie not found in DB");
+                        return NotFound();
+                    }
+
+                    existingRecord.Title = updatedInfo.Title;
+                    existingRecord.Year = updatedInfo.Year;
+                    existingRecord.Edited = updatedInfo.Edited;
+                    existingRecord.CopiedToPlex = updatedInfo.CopiedToPlex;
+                    existingRecord.CategoryId = updatedInfo.CategoryId;
+
+                    _context.SaveChanges();
+                    Console.WriteLine("Success: Record updated");
+
+                    return RedirectToAction(nameof(MovieCollection));
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Database update Failed: {ex.Message}");
+                }
+            }
+            else
+            {
+                Console.WriteLine("ModelState is invalid");
+                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    Console.WriteLine($"Validaiton Error: {error.ErrorMessage}");
+                }
+            }
+
+            return View(updatedInfo);
+        }
+
+        //[HttpPost]
+        //public IActionResult Edit(AddMovie updatedInfo)
+        //{
+        //    _context.Update(updatedInfo);
+        //    _context.SaveChanges();
+
+        //    return RedirectToAction("MovieCollection");
+        //}
+
+        [HttpGet]
+        public IActionResult Delete(int id)
+        {
+            var recordToDelete = _context.Movies
+                .Single(x => x.MovieId == id);
+
+            return View(recordToDelete);
+        }
+
+        [HttpPost]
+        public IActionResult Delete(AddMovie movie)
+        {
+            _context.Movies.Remove(movie);
+            _context.SaveChanges();
+
+            return RedirectToAction("MovieCollection");
+        }
     }
 }
