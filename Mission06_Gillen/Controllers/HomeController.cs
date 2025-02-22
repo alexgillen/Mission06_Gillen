@@ -77,13 +77,14 @@ namespace Mission06_Gillen.Controllers
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
-        public IActionResult Edit(int id)
+        public IActionResult Edit(string id)
         {
-            var recordToEdit = _context.Categories
-                .Single(x => x.CategoryId == id);
+            var recordToEdit = _context.Movies
+                .SingleOrDefault(x => x.MovieId == id);
 
-            ViewBag.Categories = _context.Categories
-                .OrderBy(x => x.CategoryName)
+            ViewBag.Categories = _context.Movies
+                .Where(x => !string.IsNullOrEmpty(x.Title))
+                .OrderBy(x => x.Title)
                 .ToList();
 
             return View("MovieForm", recordToEdit);
