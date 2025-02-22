@@ -36,6 +36,9 @@
 				<td>@x.LentTo</td>
 				<td>@x.CopiedToPlex</td>
 				<td>@x.Notes</td>
+
+				<td><a class =" btn btn-info" asp-controller="Home" asp-action="Edit" asp-route-id="@x.Title">Edit</a></td>
+				<td><a class="btn btn-danger">Delete</a></td>
 			</tr>
 	        
         </tbody>

@@ -63,7 +63,6 @@ namespace Mission06_Gillen.Controllers
                     LentTo = x.LentTo ?? "Not Lent",
                     Notes = x.Notes ?? "No Notes"
                 })
-                .Where(x => x.Title != null)
                 .OrderBy(x => x.Title)
                 .ToList();
 
@@ -75,6 +74,18 @@ namespace Mission06_Gillen.Controllers
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        public IActionResult Edit(int id)
+        {
+            var recordToEdit = _context.Categories
+                .Single(x => x.CategoryId == id);
+
+            ViewBag.Categories = _context.Categories
+                .OrderBy(x => x.CategoryName)
+                .ToList();
+
+            return View("MovieForm", recordToEdit);
         }
         
     }
