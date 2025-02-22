@@ -43,6 +43,7 @@ namespace Mission06_Gillen.Controllers
         [HttpPost]
         public IActionResult MovieForm(AddMovie response)
         {
+            response.MovieId = Guid.NewGuid().ToString(); // or any other unique value
             _context.Movies.Add(response);
             _context.SaveChanges();
 
