@@ -64,55 +64,7 @@ namespace Mission06_Gillen.Controllers
 
             return View(movies);
 
-
-            //var movies = _context.Movies
-            //    .Select(x => new AddMovie
-            //    {
-            //        MovieId = x.MovieId,
-            //        Title = x.Title ?? "Unknown Title",
-            //        Year = x.Year ?? "Unknown Year",
-            //        Director = x.Director ?? "Unknown Director",
-            //        Rating = x.Rating ?? "Unrated",
-            //        Edited = x.Edited,
-            //        CopiedToPlex = x.CopiedToPlex,
-            //        LentTo = x.LentTo ?? "Not Lent",
-            //        Notes = x.Notes ?? "No Notes"
-            //    })
-            //    .OrderBy(x => x.Title)
-            //    .ToList();
-
-            //return View(movies);
         }
-
-
-        //[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        //public IActionResult Error()
-        //{
-        //    return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        //}
-
-        //[HttpGet]
-        //public IActionResult Edit(int id)
-        //{
-        //    var recordToEdit = _context.Movies
-        //        .FirstOrDefault(x => x.MovieId == id);
-        //    return View("Edit", recordToEdit);
-
-
-        //    //var recordToEdit = _context.Movies
-        //    //    .Single(x => x.MovieId == id);
-
-        //    //if (recordToEdit == null)
-        //    //{
-        //    //    return NotFound();
-        //    //}
-
-        //    //ViewBag.Categories = _context.Categories
-        //    //    .OrderBy(x => x.CategoryId)
-        //    //    .ToList();
-
-        //    //return View("MovieForm", recordToEdit);
-        //}
 
         [HttpGet]
         public IActionResult Edit(int id)
@@ -152,8 +104,12 @@ namespace Mission06_Gillen.Controllers
 
                     existingRecord.Title = updatedInfo.Title;
                     existingRecord.Year = updatedInfo.Year;
+                    existingRecord.Director = updatedInfo.Director;
+                    existingRecord.Rating = updatedInfo.Rating;
                     existingRecord.Edited = updatedInfo.Edited;
+                    existingRecord.LentTo = updatedInfo.LentTo;
                     existingRecord.CopiedToPlex = updatedInfo.CopiedToPlex;
+                    existingRecord.Notes = updatedInfo.Notes;
                     existingRecord.CategoryId = updatedInfo.CategoryId;
 
                     _context.SaveChanges();
@@ -177,15 +133,6 @@ namespace Mission06_Gillen.Controllers
 
             return View(updatedInfo);
         }
-
-        //[HttpPost]
-        //public IActionResult Edit(AddMovie updatedInfo)
-        //{
-        //    _context.Update(updatedInfo);
-        //    _context.SaveChanges();
-
-        //    return RedirectToAction("MovieCollection");
-        //}
 
         [HttpGet]
         public IActionResult Delete(int id)
