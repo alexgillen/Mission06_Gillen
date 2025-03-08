@@ -91,26 +91,38 @@ namespace Mission06_Gillen.Controllers
         //    return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         //}
 
+        //[HttpGet]
+        //public IActionResult Edit(int id)
+        //{
+        //    var recordToEdit = _context.Movies
+        //        .FirstOrDefault(x => x.MovieId == id);
+        //    return View("Edit", recordToEdit);
+
+
+        //    //var recordToEdit = _context.Movies
+        //    //    .Single(x => x.MovieId == id);
+
+        //    //if (recordToEdit == null)
+        //    //{
+        //    //    return NotFound();
+        //    //}
+
+        //    //ViewBag.Categories = _context.Categories
+        //    //    .OrderBy(x => x.CategoryId)
+        //    //    .ToList();
+
+        //    //return View("MovieForm", recordToEdit);
+        //}
+
         [HttpGet]
         public IActionResult Edit(int id)
         {
-            var recordToEdit = _context.Movies
-                .Where(x => x.MovieId == 1);
-            return View("MovieForm");
-
-            //var recordToEdit = _context.Movies
-            //    .Single(x => x.MovieId == id);
-
-            //if (recordToEdit == null)
-            //{
-            //    return NotFound();
-            //}
-
-            //ViewBag.Categories = _context.Categories
-            //    .OrderBy(x => x.CategoryId)
-            //    .ToList();
-
-            //return View("MovieForm", recordToEdit);
+            var movie = _context.Movies.Find(id);
+            if (movie == null)
+            {
+                return NotFound();
+            }
+            return View(movie);
         }
 
         [HttpPost]
@@ -132,7 +144,7 @@ namespace Mission06_Gillen.Controllers
                     var existingRecord = _context.Movies
                         .FirstOrDefault(x => x.MovieId == id);
 
-                    if (existingRecord != null)
+                    if (existingRecord == null)
                     {
                         Console.WriteLine("Error: Movie not found in DB");
                         return NotFound();
